@@ -198,9 +198,10 @@ int _TlvParseMessage(void * msg, IeDescription * msgDes, void * buff, int buffLe
     int idx;
     for (idx = 0; idx < msgDes->numToParse; ++idx) {
         if (dbf) { if (ieDescriptionTable[msgDes->next[idx]].msgType == 57) {
-                UTLT_Warning("Get F-SEID");
+	    UTLT_Warning("Get F-SEID, numToPares:%d",msgDes->numToParse);
             } }
         IeDescription *ieDes = &ieDescriptionTable[msgDes->next[idx]];
+	UTLT_Info("Next: idx %d", idx);
         uint16_t type;
         uint16_t length;
         memcpy(&type, buff + buffOffset, sizeof(uint16_t));
