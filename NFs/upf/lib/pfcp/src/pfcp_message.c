@@ -196,7 +196,7 @@ int _TlvParseMessageInside(void * msg, IeDescription * msgDes, void * buff, int 
     //void *root = buff;
     int buffOffset = 0; // buff offset
     int idx;
-    for (idx = 0; idx < msgDes->numToParse; ++idx) {
+    for (idx = 0; idx < 100; ++idx) {
       if (dbf) { if (ieDescriptionTable[msgDes->next[idx]].msgType == 57) {
 	  UTLT_Warning("Get F-SEID, numToPares:%d",msgDes->numToParse);
 	} }
@@ -245,7 +245,7 @@ int _TlvParseMessage(void * msg, IeDescription * msgDes, void * buff, int buffLe
     //void *root = buff;
     int buffOffset = 0; // buff offset
     int idx;
-    for (idx = 0; idx < msgDes->numToParse; ++idx) {
+    for (idx = 0; idx < 100; ++idx) {
       if (dbf) { if (ieDescriptionTable[msgDes->next[idx]].msgType == 57) {
 	  UTLT_Warning("Get F-SEID, numToPares:%d",msgDes->numToParse);
 	} }
