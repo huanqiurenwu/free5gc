@@ -207,11 +207,16 @@ int _TlvParseMessageInside(void * msg, IeDescription * msgDes, void * buff, int 
       memcpy(&length, buff + buffOffset + sizeof(uint16_t), sizeof(uint16_t));
       type = ntohs(type);
       length = ntohs(length);
+      if (type >= sizeof(ieDescriptionTable) | type == 0 | length == 0) {
+	UTLT_Error("inside type:%d sizeof ieDescriptionTable %d", type, sizeof(ieDescriptionTable));
+	return buffOffset;
+      }
       IeDescription *ieDes = &ieDescriptionTable[type];
       UTLT_Info("Next: idx %d", idx);
       if (dbf) { UTLT_Info("type: %d, len: %d", type, length); }
       if (ieDes->isTlvObj) {
 	if (dbf) { UTLT_Info("is TLV: %p", msg+msgPivot); }
+"	modify pushed code"
 	((TlvOctet*)(msg+msgPivot))->presence = 1;
 	((TlvOctet*)(msg+msgPivot))->type = type;
 	void *newBuf = UTLT_Malloc(length);
@@ -258,8 +263,8 @@ int _TlvParseMessage(void * msg, IeDescription * msgDes, void * buff, int buffLe
       memcpy(&length, buff + buffOffset + sizeof(uint16_t), sizeof(uint16_t));
       type = ntohs(type);
       length = ntohs(length);
-      if (type >= sizeof(ieDescriptionTable)) {
-	UTLT_Error("type:%d sizeof ieDescriptionTable %d", type, sizeof(ieDescriptionTable));
+      if (type >= sizeof(ieDescriptionTable) | type == 0 | length == 0) {
+	UTLT_Error("out side type:%d sizeof ieDescriptionTable %d", type, sizeof(ieDescriptionTable));
 	  return buffOffset;
       }
       IeDescription *ieDes = &ieDescriptionTable[type];
