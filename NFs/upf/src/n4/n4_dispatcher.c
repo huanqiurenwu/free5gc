@@ -57,7 +57,7 @@ void UpfDispatcher(const Event *event) {
         UTLT_Assert(bufBlk, goto freeRecvBuf, "create buffer error");
         pfcpMessage = bufBlk->buf;
         UTLT_Assert(pfcpMessage, goto freeBuf, "pfcpMessage assigned error");
-
+	UTLT_Warning("[PFCP] Chen decoding pfcpmessage");
         status = PfcpParseMessage(pfcpMessage, recvBufBlk);
         UTLT_Assert(status == STATUS_OK, goto freeBuf, "PfcpParseMessage error");
 
