@@ -197,29 +197,26 @@ int _TlvParseMessage(void * msg, IeDescription * msgDes, void * buff, int buffLe
     int buffOffset = 0; // buff offset
     int idx;
     for (idx = 0; idx < msgDes->numToParse; ++idx) {
-      for (int i = 0; i < sizeof(msgDes -> next); i ++) {
-	UTLT_Info("next: %d", msgDes -> next[i]);
+      if (dbf) { if (ieDescriptionTable[msgDes->next[idx]].msgType == 57) {
+	  UTLT_Warning("Get F-SEID, numToPares:%d",msgDes->numToParse);
+	} }
+      uint16_t type;
+      uint16_t length;
+      memcpy(&type, buff + buffOffset, sizeof(uint16_t));
+      memcpy(&length, buff + buffOffset + sizeof(uint16_t), sizeof(uint16_t));
+      type = ntohs(type);
+      length = ntohs(length);
+      IeDescription *ieDes = &ieDescriptionTable[type];
+      UTLT_Info("Next: idx %d", idx);
+      if (dbf) { UTLT_Info("type: %d, len: %d", type, length); }
+      if (type != ieDes->msgType) {
+	if (dbf) { UTLT_Warning("%d not present, type: %d", ieDes->msgType, type); }
+	// not present
+	(*(unsigned long*)(msg + msgPivot)) = 0; // presence
+	msgPivot += ieDes->msgLen;
+	continue;
       }
-        if (dbf) { if (ieDescriptionTable[msgDes->next[idx]].msgType == 57) {
-	    UTLT_Warning("Get F-SEID, numToPares:%d",msgDes->numToParse);
-	  } }
-	uint16_t type;
-        uint16_t length;
-        memcpy(&type, buff + buffOffset, sizeof(uint16_t));
-        memcpy(&length, buff + buffOffset + sizeof(uint16_t), sizeof(uint16_t));
-        type = ntohs(type);
-        length = ntohs(length);
-        IeDescription *ieDes = &ieDescriptionTable[type];
-	UTLT_Info("Next: idx %d", idx);
-        if (dbf) { UTLT_Info("type: %d, len: %d", type, length); }
-        if (type != ieDes->msgType) {
-            if (dbf) { UTLT_Warning("%d not present, type: %d", ieDes->msgType, type); }
-            // not present
-            (*(unsigned long*)(msg + msgPivot)) = 0; // presence
-            msgPivot += ieDes->msgLen;
-            continue;
-        }
-
+      
         if (ieDes->isTlvObj) {
             if (dbf) { UTLT_Info("is TLV: %p", msg+msgPivot); }
             ((TlvOctet*)(msg+msgPivot))->presence = 1;
