@@ -207,7 +207,7 @@ int _TlvParseMessageInside(void * msg, IeDescription * msgDes, void * buff, int 
       memcpy(&length, buff + buffOffset + sizeof(uint16_t), sizeof(uint16_t));
       type = ntohs(type);
       length = ntohs(length);
-      if (type >= sizeof(ieDescriptionTable) | type == 0 | length == 0) {
+      if (type >= sizeof(ieDescriptionTable) || type == 0 || length == 0) {
 	UTLT_Error("inside type:%d sizeof ieDescriptionTable %d", type, sizeof(ieDescriptionTable));
 	return buffOffset;
       }
@@ -263,7 +263,7 @@ int _TlvParseMessage(void * msg, IeDescription * msgDes, void * buff, int buffLe
       memcpy(&length, buff + buffOffset + sizeof(uint16_t), sizeof(uint16_t));
       type = ntohs(type);
       length = ntohs(length);
-      if (type >= sizeof(ieDescriptionTable) | type == 0 | length == 0) {
+      if (type >= sizeof(ieDescriptionTable) || type == 0 || length == 0) {
 	UTLT_Error("out side type:%d sizeof ieDescriptionTable %d", type, sizeof(ieDescriptionTable));
 	  return buffOffset;
       }
