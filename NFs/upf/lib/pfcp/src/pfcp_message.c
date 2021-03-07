@@ -259,6 +259,7 @@ int _TlvParseMessage(void * msg, IeDescription * msgDes, void * buff, int buffLe
       type = ntohs(type);
       length = ntohs(length);
       if (type >= sizeof(&ieDescriptionTable)) {
+	UTLT_Error("type:%d sizeof ieDescriptionTable %d", type, sizeof(&ieDescriptionTable));
 	  return buffOffset;
       }
       IeDescription *ieDes = &ieDescriptionTable[type];
