@@ -231,6 +231,9 @@ int _TlvParseMessageInside(void * msg, IeDescription * msgDes, void * buff, int 
 	//int size = _TlvParseMessage(msg+msgPivot, ieDes, buff + buffOffset, buffLen - buffOffset);
 	buffOffset += length + sizeof(uint16_t)*2;
 	msgPivot += ieDes->msgLen;
+	if (buffOffset == totalLength) {
+	  return buffOffset;
+	}
       }
     }
     return buffOffset;
@@ -252,6 +255,9 @@ int _TlvParseMessage(void * msg, IeDescription * msgDes, void * buff, int buffLe
       memcpy(&length, buff + buffOffset + sizeof(uint16_t), sizeof(uint16_t));
       type = ntohs(type);
       length = ntohs(length);
+      if (type >= sizeof(&ieDescriptionTable)) {
+	  return buffOffset;
+      }
       IeDescription *ieDes = &ieDescriptionTable[type];
       UTLT_Info("Next: idx %d", idx);
       if (dbf) { UTLT_Info("type: %d, len: %d", type, length); }
