@@ -191,6 +191,52 @@ static IeDescription ieDescriptionTable[] = {\
 
 _Bool dbf = 1;
 
+int _TlvParseMessageInside(void * msg, IeDescription * msgDes, void * buff, int buffLen, int totalLength) {
+    int msgPivot = 0; // msg (struct) offset
+    //void *root = buff;
+    int buffOffset = 0; // buff offset
+    int idx;
+    for (idx = 0; idx < msgDes->numToParse; ++idx) {
+      if (dbf) { if (ieDescriptionTable[msgDes->next[idx]].msgType == 57) {
+	  UTLT_Warning("Get F-SEID, numToPares:%d",msgDes->numToParse);
+	} }
+      uint16_t type;
+      uint16_t length;
+      memcpy(&type, buff + buffOffset, sizeof(uint16_t));
+      memcpy(&length, buff + buffOffset + sizeof(uint16_t), sizeof(uint16_t));
+      type = ntohs(type);
+      length = ntohs(length);
+      IeDescription *ieDes = &ieDescriptionTable[type];
+      UTLT_Info("Next: idx %d", idx);
+      if (dbf) { UTLT_Info("type: %d, len: %d", type, length); }
+      if (ieDes->isTlvObj) {
+	if (dbf) { UTLT_Info("is TLV: %p", msg+msgPivot); }
+	((TlvOctet*)(msg+msgPivot))->presence = 1;
+	((TlvOctet*)(msg+msgPivot))->type = type;
+	void *newBuf = UTLT_Malloc(length);
+	memcpy(newBuf, buff + buffOffset + 2*sizeof(uint16_t), length);
+	((TlvOctet*)(msg+msgPivot))->len = length;
+	((TlvOctet*)(msg+msgPivot))->value = newBuf;
+	buffOffset += sizeof(uint16_t)*2 + length;
+	msgPivot += sizeof(TlvOctet);
+	if (buffOffset == totalLength){
+	  return buffOffset;
+	}
+	continue;
+      } else {
+	if (dbf) { UTLT_Info("not TLV, desTB mstype: %d", ieDes->msgType); }
+	// recursive
+	*((unsigned long*)(msg+msgPivot)) = 1; // presence
+	_TlvParseMessageInside(msg+msgPivot+sizeof(unsigned long), ieDes, buff + buffOffset + sizeof(uint16_t)*2, buffLen - buffOffset, length);
+	//int size = _TlvParseMessage(msg+msgPivot, ieDes, buff + buffOffset, buffLen - buffOffset);
+	buffOffset += length + sizeof(uint16_t)*2;
+	msgPivot += ieDes->msgLen;
+      }
+    }
+    return buffOffset;
+}
+
+
 int _TlvParseMessage(void * msg, IeDescription * msgDes, void * buff, int buffLen) {
     int msgPivot = 0; // msg (struct) offset
     //void *root = buff;
@@ -232,15 +278,16 @@ int _TlvParseMessage(void * msg, IeDescription * msgDes, void * buff, int buffLe
 	if (dbf) { UTLT_Info("not TLV, desTB mstype: %d", ieDes->msgType); }
 	// recursive
 	*((unsigned long*)(msg+msgPivot)) = 1; // presence
-	_TlvParseMessage(msg+msgPivot+sizeof(unsigned long), ieDes, buff + buffOffset + sizeof(uint16_t)*2, buffLen - buffOffset);
+	_TlvParseMessageInside(msg+msgPivot+sizeof(unsigned long), ieDes, buff + buffOffset + sizeof(uint16_t)*2, buffLen - buffOffset, length);
 	//int size = _TlvParseMessage(msg+msgPivot, ieDes, buff + buffOffset, buffLen - buffOffset);
 	buffOffset += length + sizeof(uint16_t)*2;
 	msgPivot += ieDes->msgLen;
-	continue;
       }
     }
     return buffOffset;
 }
+
+
 
 Status PfcpParseMessage(PfcpMessage *pfcpMessage, Bufblk *bufBlk) {
     Status status = STATUS_OK;
